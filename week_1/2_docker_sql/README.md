@@ -1,4 +1,5 @@
 Docker and SQL
+
 Notes I used for preparing the videos: link
 
 Commands
@@ -7,7 +8,9 @@ All the commands from the video
 Downloading the data
 
 wget https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2021-01.csv
+
 Running Postgres with Docker
+
 Windows
 Running postgres on windows (note the full path)
 
@@ -15,36 +18,25 @@ docker run -it \
   -e POSTGRES_USER="root" \
   -e POSTGRES_PASSWORD="root" \
   -e POSTGRES_DB="ny_taxi" \
-  -v c:/Users/ashva/OneDrive/Рабочий стол/курсы/DE Zoomcamp/week_1/2_docker_sql/ny_taxi_postgres_data:/var/lib/postgresql/data \
+  -v /c/Users/ashva/git/de_zoomcamp/week_1/2_docker_sql/ny_taxi_postgres_data;C:/var/lib/postgresql/data \
   -p 5432:5432 \
   postgres:13
-If you have the following error:
 
-docker run -it \
-  -e POSTGRES_USER="root" \
-  -e POSTGRES_PASSWORD="root" \
-  -e POSTGRES_DB="ny_taxi" \
-  -v e:/zoomcamp/data_engineer/week_1_fundamentals/2_docker_sql/ny_taxi_postgres_data:/var/lib/postgresql/data  \
-  -p 5432:5432 \
-  postgres:13
+If you have the following error:
 
 docker: Error response from daemon: invalid mode: \Program Files\Git\var\lib\postgresql\data.
 See 'docker run --help'.
 Change the mouning path. Replace it with the following:
 
--p /e/zoomcamp/...:/var/lib/postgresql/data
-Linux and MacOS
-docker run -it \
-  -e POSTGRES_USER="root" \
-  -e POSTGRES_PASSWORD="root" \
-  -e POSTGRES_DB="ny_taxi" \
-  -v $(pwd)/ny_taxi_postgres_data:/var/lib/postgresql/data \
-  -p 5432:5432 \
-  postgres:13
+-v /c/Users/...:/var/lib/postgresql/data
+
+
 If you see that ny_taxi_postgres_data is empty after running the container, try these:
 
 Deleting the folder and running Docker again (Docker will re-create the folder)
 Adjust the permissions of the folder by running sudo chmod a+rwx ny_taxi_postgres_data
+
+
 CLI for Postgres
 Installing pgcli
 
