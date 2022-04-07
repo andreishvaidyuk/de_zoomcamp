@@ -24,22 +24,14 @@ docker run -it \
   -e POSTGRES_USER="root" \
   -e POSTGRES_PASSWORD="root" \
   -e POSTGRES_DB="ny_taxi" \
-  -v v /c/Users/ashva/git/de_zoomcamp/week_1/2_docker_sql/ny_taxi_postgres_data;C:/var/lib/postgresql/data \
-  -p 5432:5432 \
+  -v c:/Users/ashva/git/de_zoomcamp/week_1/2_docker_sql/ny_taxi_postgres_data:/var/lib/postgresql/data \
+  -p 5431:5432 \
   postgres:13
 ```
 
 If you have the following error:
 
 ```
-docker run -it \
-  -e POSTGRES_USER="root" \
-  -e POSTGRES_PASSWORD="root" \
-  -e POSTGRES_DB="ny_taxi" \
-  -v v /c/Users/ashva/git/de_zoomcamp/week_1/2_docker_sql/ny_taxi_postgres_data;C:/var/lib/postgresql/data \
-  -p 5432:5432 \
-  postgres:13
-
 docker: Error response from daemon: invalid mode: \Program Files\Git\var\lib\postgresql\data.
 See 'docker run --help'.
 ```
@@ -47,14 +39,15 @@ See 'docker run --help'.
 Change the mouning path. Replace it with the following:
 
 ```
--v /c/Users/...:/var/lib/postgresql/data
+-v //c/Users/...:/var/lib/postgresql/data
 ```
 
 If you see that `ny_taxi_postgres_data` is empty after running
 the container, try these:
 
 * Deleting the folder and running Docker again (Docker will re-create the folder)
-* Adjust the permissions of the folder by running `sudo chmod  a+rwx ny_taxi_postgres_data`
+* Give "Full Control" to the folder I am using as local/source mounting directory and adding it to the sharing group "Everyone" (right click on folder> Properties> Sharing> Advanced Settings)
+* Verify the docker-daemon C drive sharing is activated (with Linux mounting system, so I need to use -v //c/Users/...:/var/lib/postgresql/data to access my drive and properly mount it on the container)
 
 
 ### CLI for Postgres
@@ -78,10 +71,20 @@ Using pgcli to connect to postgres
 pgcli -h localhost -p 5432 -u root -d ny_taxi
 ```
 
+If you have a problem 
+```
+connection to server at "localhost" (::1), port 5432 failed: FATAL:  password authentication
+failed for user "root" .
+```
+
+change the port on the host to 5431
+
 Dataset:
 
 * https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
 * https://www1.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf
+
+Upload process described in file `upload-data.ipynb`.
 
 
 Running pgAdmin
@@ -96,7 +99,7 @@ docker run -it \
 
 ### Running Postgres and pgAdmin together
 
-Create a network
+Create a network to be able to connect Postgres and PgAdmin (hey are now in different containers).
 
 ```bash
 docker network create pg-network
@@ -109,8 +112,8 @@ docker run -it \
   -e POSTGRES_USER="root" \
   -e POSTGRES_PASSWORD="root" \
   -e POSTGRES_DB="ny_taxi" \
-  -v c:/Users/alexe/git/data-engineering-zoomcamp/week_1_basics_n_setup/2_docker_sql/ny_taxi_postgres_data:/var/lib/postgresql/data \
-  -p 5432:5432 \
+  -v //c/Users/ashva/git/de_zoomcamp/week_1/2_docker_sql/ny_taxi_postgres_data:/var/lib/postgresql/data \
+  -p 5431:5432 \
   --network=pg-network \
   --name pg-database \
   postgres:13
@@ -124,7 +127,7 @@ docker run -it \
   -e PGADMIN_DEFAULT_PASSWORD="root" \
   -p 8080:80 \
   --network=pg-network \
-  --name pgadmin-2 \
+  --name pgadmin \
   dpage/pgadmin4
 ```
 
