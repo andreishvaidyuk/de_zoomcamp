@@ -6,12 +6,3 @@ print(sys.argv)
 day = sys.argv[1]
 
 print(f"job finished successfully for day = {day}")
-
-
-    docker run -it \
-      -e POSTGRES_USER="root" \
-      -e POSTGRES_PASSWORD="root" \
-      -e POSTGRES_DB="ny_taxi" \
-      -v c:/Users/ashva/OneDrive/Рабочий стол/курсы/DE Zoomcamp/Week_1/2_docker_sql/ny_taxi_postgres_data:/var/lib/postgresql/data \
-      -p 5432:5432 \
-      postgres:13

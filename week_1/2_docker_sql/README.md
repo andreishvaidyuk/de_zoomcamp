@@ -99,7 +99,7 @@ docker run -it \
 
 ### Running Postgres and pgAdmin together
 
-Create a network to be able to connect Postgres and PgAdmin (hey are now in different containers).
+Create a network to be able to connect Postgres and PgAdmin (they are now in different containers).
 
 ```bash
 docker network create pg-network
@@ -136,6 +136,8 @@ docker run -it \
 
 Running locally
 
+Firstly prepare script `ingest_data.py`
+
 ```bash
 URL="https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2021-01.csv"
 
@@ -145,7 +147,7 @@ python ingest_data.py \
   --host=localhost \
   --port=5432 \
   --db=ny_taxi \
-  --table_name=yellow_taxi_trips \
+  --table_name=yellow_taxi_data \
   --url=${URL}
 ```
 
@@ -156,9 +158,10 @@ docker build -t taxi_ingest:v001 .
 ```
 
 Run the script with Docker
+We need to change "host" from "local" to "pg-database".
 
 ```bash
-URL="http://172.24.208.1:8000/yellow_tripdata_2021-01.csv"
+URL="https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2021-01.csv"
 
 docker run -it \
   --network=pg-network \
@@ -168,9 +171,10 @@ docker run -it \
     --host=pg-database \
     --port=5432 \
     --db=ny_taxi \
-    --table_name=yellow_taxi_trips \
+    --table_name=yellow_taxi_data \
     --url=${URL}
 ```
+After that data will available through PgAdmin.
 
 ### Docker-Compose 
 
