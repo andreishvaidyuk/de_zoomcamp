@@ -178,6 +178,8 @@ After that data will available through PgAdmin.
 
 ### Docker-Compose 
 
+Prepare `docker-compose.yaml` file with all configuration in one file.
+
 Run it:
 
 ```bash
