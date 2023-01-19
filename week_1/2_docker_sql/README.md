@@ -96,6 +96,8 @@ docker run -it \
   -p 8080:80 \
   dpage/pgadmin4
 ```
+After that we need to go to `localhost:8080`, enter email and password. Now we need to create a new server. 
+But server will not created because Postgres and PgAdmin are now in different containers.
 
 ### Running Postgres and pgAdmin together
 
@@ -131,6 +133,7 @@ docker run -it \
   dpage/pgadmin4
 ```
 
+Now it works fine.
 
 ### Data ingestion
 
@@ -139,7 +142,7 @@ Running locally
 Firstly prepare script `ingest_data.py`
 
 ```bash
-URL="https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2021-01.csv"
+URL="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2020-01.csv.gz"
 
 python ingest_data.py \
   --user=root \
@@ -161,7 +164,7 @@ Run the script with Docker
 We need to change "host" from "local" to "pg-database".
 
 ```bash
-URL="https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2021-01.csv"
+URL="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2020-01.csv.gz"
 
 docker run -it \
   --network=pg-network \
@@ -174,6 +177,25 @@ docker run -it \
     --table_name=yellow_taxi_data \
     --url=${URL}
 ```
+
+Ingest data with zones.
+```bash
+docker build -t zones_ingest:v001 .
+
+URL="https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv"
+
+docker run -it \
+  --network=pg-network \
+  zones_ingest:v001 \
+    --user=root \
+    --password=root \
+    --host=pg-database \
+    --port=5432 \
+    --db=ny_taxi \
+    --table_name=zones \
+    --url=${URL}
+```
+
 After that data will available through PgAdmin.
 
 ### Docker-Compose 
@@ -212,4 +234,72 @@ services:
 
 ### SQL 
 
-Coming soon!
+Some queries:
+```text
+select *
+From yellow_taxi_data
+LIMIT 100
+```
+
+Select from 2 tables
+```text
+select 
+	* 
+from 
+	yellow_taxi_data as d,
+	zones as zpu,
+	zones as zdo
+where 
+	d."PULocationID" = zpu."LocationID" and
+	d."DOLocationID" = zdo."LocationID"
+limit 100
+```
+
+```text
+select 
+	tpep_pickup_datetime,
+	tpep_dropoff_datetime,
+	total_amount,
+	concat(zpu."Borough", '/', zpu."Zone") as pickup_loc,
+	concat(zdo."Borough", '/', zdo."Zone") as dropoff_loc 
+from 
+	yellow_taxi_data as d,
+	zones as zpu,
+	zones as zdo
+where 
+	d."PULocationID" = zpu."LocationID" and
+	d."DOLocationID" = zdo."LocationID"
+limit 100
+```
+Same result with JOIN statement
+```text
+select 
+	tpep_pickup_datetime,
+	tpep_dropoff_datetime,
+	total_amount,
+	concat(zpu."Borough", '/', zpu."Zone") as pickup_loc,
+	concat(zdo."Borough", '/', zdo."Zone") as dropoff_loc 
+from 
+	yellow_taxi_data as d 
+		join zones as zpu
+			on d."PULocationID" = zpu."LocationID"
+		join zones as zdo
+			on d."DOLocationID" = zdo."LocationID"
+limit 100
+```
+
+GROUP BY and ORDER BY statements
+```text
+select 
+	CAST (tpep_dropoff_datetime as DATE) as day,
+	total_amount,
+	count(1) as count
+	max(total_amount),
+	max(passenger_count)
+from
+	yellow_taxi_data as d 
+GROUP BY 
+	CAST (tpep_dropoff_datetime as DATE)
+ORDER BY
+	"count" DESC
+```
