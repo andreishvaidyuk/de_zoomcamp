@@ -43,14 +43,14 @@ prefect orion start
 Described in week_1\1_terraform_gcp
 
 
-##Register the block types that come with prefect-gcp
+## Register the block types that come with prefect-gcp
 In Orion UI create block type "SQLAlchemyConnector".
 
 ```text
 prefect block register -m prefect_gcp
 ```
 
-##Create Prefect GCP blocks
+## Create Prefect GCP blocks
 Create a GCP Credentials block in the Orion UI:
 * Block Name - as you want
 * Service Account File - Paste service account information from JSON file (week_1\1_terraform_gcp\gcp_owerview.md)
@@ -62,7 +62,7 @@ Create a GCS Bucket block in UI:
 
 Alternatively, create these blocks using code by following the templates in the blocks folder.
 
-##Create flow code
+## Create flow code
 Write Python functions and add @flow and @task decorators.
 
 Note file paths for store  `.parquet` file.
