@@ -15,15 +15,39 @@ def fetch(dataset_url: str) -> pd.DataFrame:
     # return df
 
     df_iter = pd.read_csv(dataset_url, iterator=True, chunksize=100000)  # compression='gzip',
-    df = next(df_iter)
-    df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
-    df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
+    df_all = next(df_iter)
+
+    try:
+        df_all.tpep_pickup_datetime = pd.to_datetime(df_all.tpep_pickup_datetime)
+        df_all.tpep_dropoff_datetime = pd.to_datetime(df_all.tpep_dropoff_datetime)
+    except:
+        pass
+    # for Green Taxi
+    try:
+        df_all.lpep_pickup_datetime = pd.to_datetime(df_all.lpep_pickup_datetime)
+        df_all.lpep_dropoff_datetime = pd.to_datetime(df_all.lpep_dropoff_datetime)
+    except:
+        pass
+
     while True:
         try:
             t_start = time()
             df = next(df_iter)
-            df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
-            df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
+
+            # for Yellow Taxi
+            try:
+                df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
+                df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
+            except:
+                pass
+            # for Green Taxi
+            try:
+                df.lpep_pickup_datetime = pd.to_datetime(df.lpep_pickup_datetime)
+                df.lpep_dropoff_datetime = pd.to_datetime(df.lpep_dropoff_datetime)
+            except:
+                pass
+
+            df_all = pd.concat([df_all, df])
             # df.to_sql(name=table_name, con=engine, if_exists='append')
             t_end = time()
 
@@ -33,7 +57,7 @@ def fetch(dataset_url: str) -> pd.DataFrame:
             print("Finished ingesting data into the postgres database")
             break
 
-    return df
+    return df_all
 
 
 @task(log_prints=True)
@@ -90,13 +114,13 @@ def etl_web_to_gcs(year: int, month: int, color: str) -> None:
 
 
 @flow()
-def etl_parent_flow(months: list[int] = [1, 2], year: int = 2021, color: str = "yellow"):
+def etl_parent_flow(months: list[int] = [2, 3], year: int = 2019, color: str = "yellow"):
     for month in months:
         etl_web_to_gcs(year, month, color)
 
 
 if __name__ == '__main__':
-    color = "yellow"
-    months = [1, 2, 3]
-    year = 2021
-    etl_parent_flow()
+    color = "green"
+    months = [4]
+    year = 2019
+    etl_parent_flow(months, year, color)

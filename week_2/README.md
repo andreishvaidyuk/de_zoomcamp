@@ -67,19 +67,27 @@ Write Python functions and add @flow and @task decorators.
 
 Note file paths for store  `.parquet` file.
 
-##Create deployments
-Create and apply your deployments.
+Add two files with parametrized flow (1 for web_to_gcs flow, 1 for gcs_to_bq flow).
 
-##Run a deployment or create a schedule
-Run a deployment ad hoc from the CLI or UI.
-
-Or create a schedule from the UI or when you create your deployment.
-
-##Start an agent
+## Create deployments
+Create and apply deployments. 
+### Deployment on the CLI
+* Build. Will create `.yaml`-file with all parameters of deployment. You can add parameters (year, months, color) into `.yaml`-file
+```commandline
+prefect deployment build ./parametrized_gcs_to_bq.py:main_flow -n "Parametrized GCS to BQ flow"
+```
+* Apply. You can see deployment parameters into Orion UI. Press button "Quick run". And go to "Work Queues / default" section to run Agent
+"
+```commandline
+prefect deployment apply main_flow-deployment.yaml
+```
+* Agent. Will run deployment task.
+```commandline
+prefect agent start --work-queue "default"
+```
 Make sure your agent set up to poll the work queue you created when you made your deployment (default if you didn't specify a work queue).
 
-##Later: create a Docker Image and use a DockerContainer infrastructure block
-Bake your flow code into a Docker image, create a DockerContainer, and your flow code in a Docker container.
+## Create Notification
+Create Notification using Orion UI.
+In the Prefect Orion UI create a Notification to send a Slack message when a flow run enters a Completed state. Here is the Webhook URL to use: https://hooks.slack.com/services/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
 
-##Optional: use Prefect Cloud for added capabilties
-Signup and use for free at https://app.prefect.cloud
