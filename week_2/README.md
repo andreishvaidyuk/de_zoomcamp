@@ -87,6 +87,23 @@ prefect agent start --work-queue "default"
 ```
 Make sure your agent set up to poll the work queue you created when you made your deployment (default if you didn't specify a work queue).
 
+## Create GitHub block
+Create GitHub block using Orion UI.
+Or use Python code alternatively
+```text
+from prefect.filesystems import GitHub
+
+github_block = GitHub(
+    name = "zoom-github", 
+    repository = "https://github.com/andreishvaidyuk/de_zoomcamp/tree/main/week_2"
+)
+github_block.save("zoom-github", overwrite=True)
+```
+Build deployment
+* ```prefect deployment build ./parametrized_web_to_gcs.py:etl_parent_flow -n "github deployment" -sb github/zoom-github```
+* ```prefect deployment apply etl_parent_flow-deployment.yaml```
+* ```prefect agent start -q 'default'```
+
 ## Create Notification
 Create Notification using Orion UI.
 In the Prefect Orion UI create a Notification to send a Slack message when a flow run enters a Completed state. Here is the Webhook URL to use: https://hooks.slack.com/services/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
